@@ -1,17 +1,36 @@
 package com.netflix.contentservice.model;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "movies")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(length = 1000)
     private String description;
-    private String genre;
+
+    @Enumerated(EnumType.STRING)
+    private Genre genre;
     private String director;
     private String cast;
     private int releaseYear;
@@ -24,5 +43,13 @@ public class Movie {
 
     //HLS master playlist URL for streaming
     private String hlsUrl;
+
+    @Enumerated(EnumType.STRING)
+    private VideoStatus videoStatus;
+
+    @CreationTimestamp
+    private LocalDate createdAt;
+    @UpdateTimestamp
+    private LocalDate updatedAt;
 
 }
