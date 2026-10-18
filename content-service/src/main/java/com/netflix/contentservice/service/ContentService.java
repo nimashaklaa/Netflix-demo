@@ -89,5 +89,6 @@ public class ContentService {
         movie.setHlsUrl(hlsUrl);
         movie.setVideoStatus(VideoStatus.READY);
         movieRepository.save(movie);
+        log.info("HLS URL updated for movie: {}", movieId);
     }
 }
