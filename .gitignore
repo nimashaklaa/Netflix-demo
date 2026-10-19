@@ -1,3 +1,6 @@
 /.idea/
 
 /video-service/src/main/resources/application.properties
+
+# Ignore local env for video-service
+/video-service/.env
