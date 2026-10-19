@@ -1,1 +1,3 @@
 /.idea/
+
+/video-service/src/main/resources/application.properties

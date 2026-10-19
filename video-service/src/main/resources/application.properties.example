@@ -1,0 +1,19 @@
+# Example application.properties for video-service
+# Copy this file to application.properties and fill in secrets or use environment variables.
+
+spring.application.name=video-service
+spring.kafka.bootstrap-servers=localhost:9092
+
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+spring.servlet.multipart.max-file-size=2GB
+spring.servlet.multipart.max-request-size=2GB
+
+server.port=8082
+
+# AWS - keep secrets out of VCS. Use environment variables or CI secrets.
+aws.access-key=${AWS_ACCESS_KEY:}
+aws.secret-key=${AWS_S3_SECRET_KEY:}
+aws.region=${AWS_S3_REGION:}
+aws.s3.bucket-name=${AWS_BUCKET_NAME:}
