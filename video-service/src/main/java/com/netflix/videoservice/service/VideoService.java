@@ -22,7 +22,7 @@ public class VideoService {
     private final S3Client s3Client;
     private final KafkaTemplate<String, VideoUploadedEvent> kafkaTemplate;
 
-    @Value("${aws.s3.bucket.name}")
+    @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
     private static final String VIDEO_UPLOADED_TOPIC = "video_uploaded";
@@ -58,5 +58,10 @@ public class VideoService {
 
         //publish event to Kafka
 
+        VideoUploadedEvent event = new VideoUploadedEvent(movieId, videoKey, bucketName, videoFile.getOriginalFilename(), videoFile.getSize()) ;
+        kafkaTemplate.send(VIDEO_UPLOADED_TOPIC,movieId, event);
+
+        log.info("VideoUploadedEvent published to Kafka for movieId: {} with videoKey: {}", movieId, videoKey);
+        return videoKey;
     }
 }
