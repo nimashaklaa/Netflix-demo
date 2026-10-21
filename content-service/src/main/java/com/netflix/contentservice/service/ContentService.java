@@ -91,4 +91,12 @@ public class ContentService {
         movieRepository.save(movie);
         log.info("HLS URL updated for movie: {}", movieId);
     }
+
+    public void updateVideoStatus(String movieId, VideoStatus videoStatus) {
+        log.info("Updating video status for movie: {}", movieId);
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie not found :"+ movieId));
+        movie.setVideoStatus(videoStatus);
+        movieRepository.save(movie);
+        log.info("Video status updated for movie: {}", movieId);
+    }
 }

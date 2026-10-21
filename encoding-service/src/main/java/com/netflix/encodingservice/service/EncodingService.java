@@ -181,10 +181,15 @@ public class EncodingService {
         );
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
+        processBuilder.inheritIO();
         Process process = processBuilder.start();
-        int exitCode = process.waitFor();
-        if(exitCode != 0) {
-            throw new RuntimeException("FFmpeg process exited with code " + exitCode);
+        try {
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("FFmpeg process exited with code " + exitCode);
+            }
+        } finally {
+            process.destroy();
         }
 
     }
