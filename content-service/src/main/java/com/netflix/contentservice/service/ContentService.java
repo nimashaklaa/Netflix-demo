@@ -56,7 +56,10 @@ public class ContentService {
                 .rating(movie.getRating())
                 .thumbnailUrl(movie.getThumbnailUrl())
                 .durationMinutes(movie.getDurationMinutes())
+                .videoKey(movie.getVideoKey())
+                .hlsUrl(movie.getHlsUrl())
                 .videoStatus(movie.getVideoStatus())
+                .createdAt(movie.getCreatedAt() != null ? movie.getCreatedAt().atStartOfDay() : null)
                 .build();
     }
 

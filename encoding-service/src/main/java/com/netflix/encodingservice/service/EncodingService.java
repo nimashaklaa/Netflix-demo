@@ -217,26 +217,40 @@ public class EncodingService {
     }
 
     private void uploadEncodedFilesToS3(String encodedPath, String outputDir) {
-        File directory = new File(outputDir);
-        uploadDirectoryToS3(directory, encodedPath,outputDir);
+        File directory = new File(encodedPath);
+        uploadDirectoryToS3(directory, encodedPath, outputDir);
     }
 
     private void uploadDirectoryToS3(File directory, String encodedPath, String outputDir) {
-        for (File file : Objects.requireNonNull(directory.listFiles())) {
+        if (directory == null || !directory.exists()) {
+            log.warn("Skipping S3 upload for missing directory: {}", directory);
+            return;
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            log.warn("No files found in directory for S3 upload: {}", directory.getAbsolutePath());
+            return;
+        }
+
+        for (File file : files) {
             if (file.isDirectory()) {
                 uploadDirectoryToS3(file, encodedPath, outputDir);
-            }else{
-              String relativePath = file.getAbsolutePath().substring(encodedPath.length() + 1).replace("\\", "/");
-              String s3Key = outputDir + relativePath;
-              String contentType = file.getName().endsWith(".m3u8") ? "application/x-mpegurl" : "video/MP2T";
-              PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                      .bucket(bucketName)
-                      .key(s3Key)
-                      .contentType(contentType)
-                      .contentLength(file.length())
-                      .build();
-              s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
-              log.info("Uploaded file to S3: {}", s3Key);
+            } else {
+                String relativePath = file.getAbsolutePath()
+                        .replace(directory.getAbsolutePath(), "")
+                        .replace("\\", "/")
+                        .replaceFirst("^/", "");
+                String s3Key = outputDir + relativePath;
+                String contentType = file.getName().endsWith(".m3u8") ? "application/x-mpegurl" : "video/MP2T";
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Key)
+                        .contentType(contentType)
+                        .contentLength(file.length())
+                        .build();
+                s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
+                log.info("Uploaded file to S3: {}", s3Key);
             }
         }
     }
