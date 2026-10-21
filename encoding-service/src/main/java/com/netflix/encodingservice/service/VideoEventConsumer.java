@@ -24,7 +24,7 @@ public class VideoEventConsumer {
      * -> EncodingService
      * ->FFmpeg encoding -> S3 upload -> Kafka(video.encoded)
      */
-    @KafkaListener(topics = "video.uploaded", groupId = "encoding-service-group")
+    @KafkaListener(topics = "video-uploaded", groupId = "encoding-service-group")
     public void consumeVideoUploadedEvent(VideoUploadedEvent event) {
         log.info("Received video uploaded event {}", event);
         try {

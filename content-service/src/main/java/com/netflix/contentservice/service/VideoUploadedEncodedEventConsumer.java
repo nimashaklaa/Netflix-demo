@@ -34,18 +34,17 @@ public class VideoUploadedEncodedEventConsumer {
             @Payload Map<String, Object> payload
     ){
         String movieId = payload.get("movieId").toString();
-        String hlsUrl = payload.get("hlsUrl").toString();
-        boolean success = (boolean) payload.get("success");
-        if(!success){
-            contentService.updateHlsUrl(movieId, hlsUrl);
-        }else{
-            String errorMessages = payload.get("errorMessages").toString();
-            log.error("Error uploading HLS URL for movieId: {}, errorMessages: {}", movieId, errorMessages);
-            contentService.updateVideoStatus(movieId, VideoStatus.READY);
+        String hlsUrl = payload.get("hlsUrl") != null ? payload.get("hlsUrl").toString() : null;
+        boolean success = Boolean.TRUE.equals(payload.get("success"));
 
+        if (success) {
+            contentService.updateHlsUrl(movieId, hlsUrl);
+            log.info("Received successful HLS URL event for movieId: {}, hlsUrl: {}", movieId, hlsUrl);
+        } else {
+            String errorMessage = payload.get("errorMessage") != null ? payload.get("errorMessage").toString() : "Unknown encoding error";
+            log.error("Encoding failed for movieId: {}, errorMessage: {}", movieId, errorMessage);
+            contentService.updateVideoStatus(movieId, VideoStatus.FAILED);
         }
-        log.info("Received HLS URL event for movieId: {}, hlsUrl: {}", movieId, hlsUrl);
-        contentService.updateVideoStatus(movieId, VideoStatus.READY);
     }
 
 }
