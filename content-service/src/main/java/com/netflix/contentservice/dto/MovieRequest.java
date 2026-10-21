@@ -2,6 +2,7 @@ package com.netflix.contentservice.dto;
 
 import com.netflix.contentservice.model.Genre;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class MovieRequest {
 
     private String description;
 
-    @NotBlank(message = "Genre is required")
+    @NotNull(message = "Genre is required")
     private Genre genre;
     private  String director;
     private String cast;

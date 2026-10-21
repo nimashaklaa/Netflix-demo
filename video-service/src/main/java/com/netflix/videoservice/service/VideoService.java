@@ -25,7 +25,7 @@ public class VideoService {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    private static final String VIDEO_UPLOADED_TOPIC = "video_uploaded";
+    private static final String VIDEO_UPLOADED_TOPIC = "video-uploaded";
 
 
     /**
