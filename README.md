@@ -2,21 +2,50 @@
 
 A Spring Boot microservice-based Netflix-inspired media platform for managing movie metadata, uploads, transcoding, and streaming.
 
-## Architecture
+## 🏗️ System Architecture
 
-This repository contains four backend services:
+The project is a set of Spring Boot services connected by REST APIs and Kafka events. There is no frontend in this repository; clients or a player call the service APIs.
 
-- `content-service`: movie catalog and metadata management
-- `video-service`: video upload orchestration and event publication
-- `encoding-service`: video processing and FFmpeg-based transcode workflow
-- `streaming-service`: presigned URL generation and HLS playlist serving
+```mermaid
+graph TD
+    Client([API Client / Video Player])
 
-Supporting infrastructure:
+    subgraph Services[Spring Boot Services]
+        Content[content-service<br/>Catalog API and event consumer]
+        Video[video-service<br/>Video upload API]
+        Encoding[encoding-service<br/>Kafka consumer and FFmpeg]
+        Streaming[streaming-service<br/>HLS and signed URL API]
+    end
 
-- MySQL for catalog data
-- Redis for caching signed streaming URLs
-- Kafka for asynchronous event communication
-- Docker Compose for local environment setup
+    subgraph Infrastructure[Local Infrastructure and AWS]
+        MySQL[(MySQL<br/>Movie catalog)]
+        Kafka[(Kafka)]
+        Zookeeper[Zookeeper]
+        S3[(Amazon S3<br/>Raw videos and HLS output)]
+        Redis[(Redis<br/>Playlist and URL cache)]
+    end
+
+    Client -->|Catalog REST API| Content
+    Client -->|Multipart upload| Video
+    Client -->|Playback / playlist REST API| Streaming
+
+    Content -->|Read and write movie metadata| MySQL
+    Video -->|Upload raw video| S3
+    Video -->|Publish video-uploaded| Kafka
+    Kafka -->|video-uploaded| Encoding
+    Encoding -->|Download raw video / upload HLS| S3
+    Encoding -->|Publish video-encoded| Kafka
+    Kafka -->|video-encoded| Content
+
+    Kafka -.->|Streaming listener expects video.encoded| Streaming
+    Streaming -->|Cache playlist and signed URLs| Redis
+    Streaming -->|Read playlists / create presigned URLs| S3
+    Zookeeper -->|Broker coordination| Kafka
+```
+
+The upload pipeline stores the original video in S3, then `encoding-service` consumes the `video-uploaded` event, uses FFmpeg to create HLS renditions, and uploads them to S3. On completion, it publishes `video-encoded`; `content-service` consumes this event to update the catalog. `streaming-service` serves playlist and signed-URL endpoints using Redis and S3.
+
+**Known event-topic mismatch:** `encoding-service` publishes to `video-encoded`, but `streaming-service` is configured to listen on `video.encoded`. Consequently, the streaming service will not receive the encoding-complete event as currently configured, so its playlist cache is not populated by that event.
 
 ## Services
 
